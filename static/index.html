@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEDGR | Financial Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div id="app"></div>
+
+    <!-- Layout Templates -->
+    <template id="layout-auth">
+        <div class="auth-container noise-bg">
+            <div class="auth-card">
+                <h1 class="logo glow">LEDGR</h1>
+                <p class="tagline">Financial Intelligence. Access Controlled.</p>
+                <div id="auth-error" class="hidden error-banner"></div>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label>EMAIL</label>
+                        <input type="email" id="email" class="mono" required placeholder="user@ledgr.dev">
+                    </div>
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="password" class="mono" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary">AUTHENTICATE</button>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <template id="layout-app">
+        <div class="app-container noise-bg">
+            <nav class="sidebar">
+                <div class="sidebar-header">
+                    <h2 class="logo">LEDGR</h2>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#dashboard" class="nav-link" data-route="dashboard">DASHBOARD</a></li>
+                    <li><a href="#transactions" class="nav-link" data-route="transactions">TRANSACTIONS</a></li>
+                    <li id="nav-users-item" class="hidden"><a href="#users" class="nav-link" data-route="users">USERS (ADMIN)</a></li>
+                </ul>
+                <div class="sidebar-footer">
+                    <div class="user-info">
+                        <span id="current-user-name" class="mono">USER</span>
+                        <span id="current-user-role" class="role-badge">ROLE</span>
+                    </div>
+                    <button id="logout-btn" class="btn-outline outline-orange">LOGOUT</button>
+                </div>
+            </nav>
+            <main class="main-content">
+                <header class="topbar">
+                    <div class="topbar-left">
+                        <h2 id="page-title" class="syne-heading">LOADING...</h2>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="live-indicator">
+                            <span class="pulsing-dot"></span> LIVE
+                        </div>
+                    </div>
+                </header>
+                <div id="page-content" class="page-scroll"></div>
+            </main>
+        </div>
+        
+        <!-- Global Notification/Error Toast -->
+        <div id="toast" class="toast hidden"></div>
+    </template>
+
+    <!-- Page Templates -->
+    <template id="page-dashboard">
+        <div class="dashboard-grid">
+            <div class="stat-cards">
+                <div class="card stat-card">
+                    <h3>Total Income</h3>
+                    <div class="stat-value text-green mono" id="dash-income">0</div>
+                </div>
+                <div class="stat-card card">
+                    <h3>Total Expenses</h3>
+                    <div class="stat-value text-orange mono" id="dash-expenses">0</div>
+                </div>
+                <div class="stat-card card">
+                    <h3>Net Balance</h3>
+                    <div class="stat-value mono" id="dash-balance">0</div>
+                </div>
+                <div class="stat-card card">
+                    <h3>Total Records</h3>
+                    <div class="stat-value text-white mono" id="dash-records">0</div>
+                </div>
+            </div>
+            
+            <div class="charts-row">
+                <div class="chart-container card w-60">
+                    <h3 class="chart-title">Monthly Trend</h3>
+                    <div class="chart-wrapper" id="trend-chart">
+                        <!-- Pure CSS bars will be injected here -->
+                    </div>
+                </div>
+                <div class="chart-container card w-40">
+                    <h3 class="chart-title">By Category</h3>
+                    <div class="chart-wrapper" id="category-chart">
+                        <!-- Pure CSS bars will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-activity card">
+                <h3>Recent Activity</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>DATE</th>
+                                <th>TYPE</th>
+                                <th>CATEGORY</th>
+                                <th>AMOUNT</th>
+                                <th>NOTES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-table-body">
+                            <!-- Rows injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="page-transactions">
+        <div class="page-header">
+            <div class="filters">
+                <select id="filter-type" class="mono">
+                    <option value="">ALL TYPES</option>
+                    <option value="income">INCOME</option>
+                    <option value="expense">EXPENSE</option>
+                </select>
+                <input type="date" id="filter-start" class="mono" title="Start Date">
+                <input type="date" id="filter-end" class="mono" title="End Date">
+                <button id="btn-filter" class="btn-outline">FILTER</button>
+            </div>
+            <button id="btn-new-record" class="btn-primary hidden">NEW RECORD</button>
+        </div>
+        
+        <div class="card">
+            <div class="table-responsive full-height">
+                <table class="data-table interactive">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>TYPE</th>
+                            <th>CATEGORY</th>
+                            <th>AMOUNT</th>
+                            <th>NOTES</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-table-body">
+                        <!-- Rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination">
+                <button id="btn-prev-page" class="btn-outline" disabled>PREV</button>
+                <span id="page-info" class="mono">PAGE 1</span>
+                <button id="btn-next-page" class="btn-outline" disabled>NEXT</button>
+            </div>
+        </div>
+
+        <!-- Transaction Modal -->
+        <div id="tx-modal" class="modal hidden">
+            <div class="modal-content card">
+                <div class="modal-header">
+                    <h3 id="modal-title">NEW RECORD</h3>
+                    <button id="btn-close-modal" class="btn-clear text-muted">&times;</button>
+                </div>
+                <form id="tx-form">
+                    <div class="input-group">
+                        <label>TYPE</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="tx-type" value="income" required> INCOME</label>
+                            <label><input type="radio" name="tx-type" value="expense"> EXPENSE</label>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>AMOUNT</label>
+                        <input type="number" id="tx-amount" step="0.01" min="0.01" class="mono" required>
+                    </div>
+                    <div class="input-group">
+                        <label>CATEGORY</label>
+                        <select id="tx-category" class="mono" required>
+                            <option value="Salary">Salary</option>
+                            <option value="Revenue">Revenue</option>
+                            <option value="Consulting">Consulting</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Misc">Misc</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>DATE</label>
+                        <input type="date" id="tx-date" class="mono" required>
+                    </div>
+                    <div class="input-group">
+                        <label>NOTES</label>
+                        <input type="text" id="tx-notes" class="mono">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary full-width">SAVE TRANSACTION</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+    <template id="page-users">
+        <div class="card">
+            <div class="table-responsive full-height">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>EMAIL</th>
+                            <th>ROLE</th>
+                            <th>STATUS</th>
+                            <th>JOINED</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </template>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/transactions.js"></script>
+    <script src="/static/js/users.js"></script>
+</body>
+</html>
